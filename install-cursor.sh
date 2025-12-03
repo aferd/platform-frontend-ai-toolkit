@@ -3,7 +3,7 @@
 # Usage: ./install-cursor.sh
 
 TARGET_DIR=".cursor/rules"
-BASE_URL="https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules"
+BASE_URL="https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules"
 API_URL="https://api.github.com/repos/RedHatInsights/platform-frontend-ai-toolkit/contents/cursor/rules"
 
 echo "🚀 Installing HCC Frontend AI Toolkit Agents for Cursor..."

@@ -219,7 +219,7 @@ This repository contains **Agents** (Rules) and **Tools** (MCPs) configured spec
 Download and run the install script in the root of **your** project:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/install-cursor.sh | bash
+curl -sSL https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/install-cursor.sh | bash
 ```
 
 ### Option B: Manual One-Liner
@@ -229,12 +229,12 @@ Run this command in the root of **your** project (the app you are working on, no
 ```bash
 # Creates .cursor/rules and downloads our team agents
 mkdir -p .cursor/rules && \
-curl -o .cursor/rules/hello-world.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/hello-world.mdc && \
-curl -o .cursor/rules/patternfly-component-builder.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/patternfly-component-builder.mdc && \
-curl -o .cursor/rules/patternfly-dataview-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/patternfly-dataview-specialist.mdc && \
-curl -o .cursor/rules/storybook-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/storybook-specialist.mdc && \
-curl -o .cursor/rules/typescript-type-refiner.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/typescript-type-refiner.mdc && \
-curl -o .cursor/rules/unit-test-writer.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/main/cursor/rules/unit-test-writer.mdc
+curl -o .cursor/rules/hello-world.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/hello-world.mdc && \
+curl -o .cursor/rules/patternfly-component-builder.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/patternfly-component-builder.mdc && \
+curl -o .cursor/rules/patternfly-dataview-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/patternfly-dataview-specialist.mdc && \
+curl -o .cursor/rules/storybook-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/storybook-specialist.mdc && \
+curl -o .cursor/rules/typescript-type-refiner.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/typescript-type-refiner.mdc && \
+curl -o .cursor/rules/unit-test-writer.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/unit-test-writer.mdc
 ```
 
 *Restart Cursor after running this.*
