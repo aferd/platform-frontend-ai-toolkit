@@ -1,3 +1,13 @@
+## 0.1.2 (2025-12-03)
+
+### 🩹 Fixes
+
+- ensure git repository matches provenance requirements ([c8239a7](https://github.com/RedHatInsights/platform-frontend-ai-toolkit/commit/c8239a7))
+
+### ❤️ Thank You
+
+- Martin Marosi @Hyperkid123
+
 ## 0.1.1 (2025-12-03)
 
 ### 🩹 Fixes
