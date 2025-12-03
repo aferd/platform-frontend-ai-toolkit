@@ -48,6 +48,14 @@ For automatic marketplace setup across your team, add this to `.claude/settings.
 ## Available Agents
 
 - **hcc-frontend-hello-world** - Simple greeting agent to verify plugin installation and functionality
+- **hcc-frontend-patternfly-component-builder** - Expert in creating PatternFly React components for forms, layouts, navigation, and modals
+- **hcc-frontend-patternfly-dataview-specialist** - Expert in PatternFly DataView components for tables, lists, and data grids
+- **hcc-frontend-patternfly-css-utility-specialist** - Expert in applying PatternFly CSS utility classes for styling and layout
+- **hcc-frontend-storybook-specialist** - Expert in creating comprehensive Storybook stories with testing and documentation
+- **hcc-frontend-typescript-type-refiner** - Expert in analyzing and refining TypeScript types to eliminate 'any' and improve type safety
+- **hcc-frontend-unit-test-writer** - Expert in writing focused unit tests for JavaScript/TypeScript functions and React hooks
+- **hcc-frontend-react-patternfly-code-quality-scanner** - Expert in scanning React + PatternFly projects for anti-patterns and technical debt
+- **hcc-frontend-dependency-cleanup-agent** - Expert in safely removing files and cleaning up orphaned dependencies
 
 ## Testing Installation
 
