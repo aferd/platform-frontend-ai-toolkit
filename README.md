@@ -332,6 +332,11 @@ npm run check-cursor-sync
 # Fix sync issues
 npm run convert-cursor
 
-# Pre-commit hook (runs automatically)
-npm run precommit
+# Pre-commit hook runs automatically via Husky
+git commit -m "feat: update agent" # Will run sync check
 ```
+
+#### Pre-commit Protection:
+- **Husky pre-commit hook** automatically runs `npm run check-cursor-sync`
+- **Commits will fail** if Cursor rules are out of sync
+- **Fix by running** `npm run convert-cursor` before committing

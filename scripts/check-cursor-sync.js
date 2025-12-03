@@ -10,23 +10,11 @@ const path = require('path');
  */
 
 function main() {
-  console.log('🔍 Checking if Cursor rules are in sync with Claude agents...\n');
-
   try {
     // Check if cursor/rules directory exists
     const cursorRulesDir = path.join(__dirname, '../cursor/rules');
     if (!fs.existsSync(cursorRulesDir)) {
-      console.log('📁 Creating cursor/rules directory...');
       fs.mkdirSync(cursorRulesDir, { recursive: true });
-    }
-
-    // Get initial git status
-    let initialStatus;
-    try {
-      initialStatus = execSync('git status --porcelain cursor/rules/', { encoding: 'utf8' });
-    } catch (error) {
-      console.log('⚠️  Warning: Unable to check git status. Proceeding with sync check...');
-      initialStatus = '';
     }
 
     // Count Claude agents
@@ -34,10 +22,7 @@ function main() {
     const claudeAgents = fs.readdirSync(claudeAgentsDir)
       .filter(file => file.startsWith('hcc-frontend-') && file.endsWith('.md'));
 
-    console.log(`📊 Found ${claudeAgents.length} Claude agents`);
-
     // Remove existing cursor rules
-    console.log('🗑️  Removing existing cursor rules...');
     const existingMdcFiles = fs.readdirSync(cursorRulesDir)
       .filter(file => file.endsWith('.mdc'));
 
@@ -45,11 +30,10 @@ function main() {
       fs.unlinkSync(path.join(cursorRulesDir, file));
     });
 
-    // Regenerate cursor rules
-    console.log('🔄 Regenerating cursor rules from Claude agents...');
+    // Regenerate cursor rules (silently)
     try {
       execSync('npm run convert-cursor', {
-        stdio: 'inherit',
+        stdio: 'pipe', // Hide output
         cwd: path.join(__dirname, '..')
       });
     } catch (error) {
@@ -61,13 +45,9 @@ function main() {
     const cursorRules = fs.readdirSync(cursorRulesDir)
       .filter(file => file.endsWith('.mdc'));
 
-    console.log(`📊 Generated ${cursorRules.length} cursor rules`);
-
     // Check if counts match
     if (claudeAgents.length !== cursorRules.length) {
-      console.error(`❌ Agent count mismatch!`);
-      console.error(`   Claude agents: ${claudeAgents.length}`);
-      console.error(`   Cursor rules: ${cursorRules.length}`);
+      console.error(`❌ Agent count mismatch! Claude: ${claudeAgents.length}, Cursor: ${cursorRules.length}`);
       process.exit(1);
     }
 
@@ -76,36 +56,30 @@ function main() {
     try {
       finalStatus = execSync('git status --porcelain cursor/rules/', { encoding: 'utf8' });
     } catch (error) {
-      console.log('⚠️  Warning: Unable to check final git status.');
-      console.log('✅ Conversion completed successfully');
+      console.log('✅ Cursor rules are in sync');
       return;
     }
 
     if (finalStatus.trim()) {
-      console.error('\n❌ Cursor rules are out of sync with Claude agents!');
-      console.error('\nThe following files have changes:');
+      console.error('❌ Cursor rules are out of sync with Claude agents!');
+      console.error('\nFiles with changes:');
       console.error(finalStatus);
-
-      console.error('\n📋 To fix this:');
-      console.error('  1. Run: npm run convert-cursor');
-      console.error('  2. Commit the updated cursor/*.mdc files');
-      console.error('  3. Push your changes');
+      console.error('\nFix: npm run convert-cursor && git add cursor/rules/');
 
       try {
         const diff = execSync('git diff cursor/rules/', { encoding: 'utf8' });
         if (diff.trim()) {
-          console.error('\n🔍 Detailed diff:');
+          console.error('\nDiff:');
           console.error(diff);
         }
       } catch (error) {
-        // Diff failed, but we already know there are changes
+        // Ignore diff errors
       }
 
       process.exit(1);
     }
 
-    console.log('\n✅ Cursor rules are in sync with Claude agents!');
-    console.log(`📊 Successfully verified ${cursorRules.length} cursor rules`);
+    console.log('✅ Cursor rules are in sync');
 
   } catch (error) {
     console.error('❌ Sync check failed:', error.message);

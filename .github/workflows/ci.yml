@@ -32,3 +32,6 @@ jobs:
 
       - name: Test packages
         run: npx nx run-many -t test --parallel=3
+
+      - name: Check Cursor rules sync
+        run: npm run check-cursor-sync
