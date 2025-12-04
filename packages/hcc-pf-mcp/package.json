@@ -2,6 +2,7 @@
   "name": "@redhat-cloud-services/hcc-pf-mcp",
   "version": "0.3.0",
   "description": "HCC PatternFly MCP package",
+  "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

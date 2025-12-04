@@ -7,7 +7,12 @@
       "default",
       "!{projectRoot}/src/tests/**/*",
       "!{projectRoot}/**/*.spec.ts",
-      "!{projectRoot}/**/*.test.ts"
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s"
     ],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/*.yml"]
   },
@@ -24,6 +29,12 @@
           "buildDepsName": "build-deps",
           "watchDepsName": "watch-deps"
         }
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
       }
     }
   ],
