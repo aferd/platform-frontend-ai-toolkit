@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'path';
 import { CallToolResult, ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { getLocalModulesMap } from '../utils/getLocalModulesMap';

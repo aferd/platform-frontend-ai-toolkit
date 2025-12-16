@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from 'fs';
+import path from 'path';
 import {promisify} from 'util'
 
 import { CallToolResult, ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";

@@ -3,4 +3,4 @@
  * This is separated into its own file to facilitate mocking in tests
  */
 
-export const resolveModule = (modulePath: string): string => import.meta.resolve(modulePath);
+export const resolveModule = (modulePath: string): string => require.resolve(modulePath);

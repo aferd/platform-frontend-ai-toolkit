@@ -7,13 +7,13 @@ import { TEST_DATA, createMockError } from '../../__tests__/testUtils';
 
 // Mock the fs module
 const mockReadFileCallback = jest.fn();
-jest.mock('node:fs', () => ({
+jest.mock('fs', () => ({
   readFile: mockReadFileCallback
 }));
 
 // Mock the util module
 const mockReadFileAsync = jest.fn();
-jest.mock('node:util', () => ({
+jest.mock('util', () => ({
   promisify: jest.fn(() => mockReadFileAsync)
 }));
 

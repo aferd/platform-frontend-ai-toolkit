@@ -17,7 +17,7 @@ jest.mock('../../utils/readFile', () => ({
   readFileAsync: mockReadFileAsync
 }));
 
-jest.mock('node:path', () => ({
+jest.mock('path', () => ({
   default: {
     join: mockPathJoin,
     resolve: mockPathResolve

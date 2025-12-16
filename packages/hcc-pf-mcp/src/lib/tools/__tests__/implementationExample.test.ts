@@ -3,13 +3,13 @@ const mockReadFile = jest.fn();
 const mockReadFileAsync = jest.fn();
 const mockPathResolve = jest.fn(() => '/mocked/path/to/file.md');
 
-jest.mock('node:fs', () => ({
+jest.mock('fs', () => ({
   default: {
     readFile: mockReadFile
   }
 }));
 
-jest.mock('node:path', () => ({
+jest.mock('path', () => ({
   default: {
     resolve: mockPathResolve
   }

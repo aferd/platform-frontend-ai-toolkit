@@ -4,6 +4,5 @@ import { run } from './lib/react-data-view-mcp.js';
 export { run };
 // CLI entry point
 if (require.main === module) {
-  console.log('🚀 HCC PatternFly MCP CLI is running!');
-  console.log(run());
+  run();
 }

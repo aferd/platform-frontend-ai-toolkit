@@ -7,10 +7,10 @@
  * This file is to workaround that issue by reading the file content directly
  *  */
 
-import { promisify } from 'node:util';
-import { readFile } from 'node:fs';
+import { promisify } from 'util';
+import fs from 'fs';
 
-export const readFileAsync = promisify(readFile);
+export const readFileAsync = promisify(fs.readFile);
 
 export const readJsonFile = async <T>(filePath: string): Promise<T> => {
   const data = await readFileAsync(filePath, 'utf-8');

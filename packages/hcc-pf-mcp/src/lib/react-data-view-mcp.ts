@@ -49,7 +49,6 @@ export async function run() {
   
     await server.connect(transport);
     
-    console.log('HCC PatternFly MCP server is running...');
   } catch (error) {
     throw new Error(`Failed to start HCC PatternFly MCP server: ${(error as Error).message}`);
   }

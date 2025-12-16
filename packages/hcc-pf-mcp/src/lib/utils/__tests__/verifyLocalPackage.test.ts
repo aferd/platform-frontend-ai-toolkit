@@ -18,7 +18,7 @@ jest.mock('../readFile', () => ({
   readJsonFile: mockReadJsonFile
 }));
 
-jest.mock('node:path', () => ({
+jest.mock('path', () => ({
   default: {
     dirname: mockPathDirname
   },
