@@ -82,7 +82,8 @@ curl -o .cursor/rules/patternfly-component-builder.mdc https://raw.githubusercon
 curl -o .cursor/rules/patternfly-dataview-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/patternfly-dataview-specialist.mdc && \
 curl -o .cursor/rules/storybook-specialist.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/storybook-specialist.mdc && \
 curl -o .cursor/rules/typescript-type-refiner.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/typescript-type-refiner.mdc && \
-curl -o .cursor/rules/unit-test-writer.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/unit-test-writer.mdc
+curl -o .cursor/rules/unit-test-writer.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/unit-test-writer.mdc && \
+curl -o .cursor/rules/weekly-report.mdc https://raw.githubusercontent.com/RedHatInsights/platform-frontend-ai-toolkit/master/cursor/rules/weekly-report.mdc
 ```
 
 *Restart Cursor after running this.*
@@ -184,18 +185,59 @@ git commit -m "feat: update example agent"
 - **hcc-frontend-unit-test-writer** - Expert in writing focused unit tests for JavaScript/TypeScript functions and React hooks
 - **hcc-frontend-react-patternfly-code-quality-scanner** - Expert in scanning React + PatternFly projects for anti-patterns and technical debt
 - **hcc-frontend-dependency-cleanup-agent** - Expert in safely removing files and cleaning up orphaned dependencies
+- **hcc-frontend-weekly-report** - Expert in generating weekly team reports by analyzing JIRA issues (user provides team identification criteria)
 
 All agents use the `hcc-frontend-` prefix to avoid name collisions with other plugins and built-in agents.
+
+## Using the Toolkit
+
+### Generating Weekly Team Reports
+
+The toolkit includes a powerful weekly reporting feature that automatically analyzes your team's JIRA activity.
+
+**Prerequisites:**
+1. Install the HCC Frontend AI Toolkit plugin (see Getting Started above)
+2. Configure the JIRA MCP server (see [JIRA MCP Setup](packages/hcc-jira-mcp/README.md#quick-start))
+3. Reload Claude Code/VSCode
+
+**Basic Usage:**
+
+Simply ask Claude Code to generate a report:
+
+```
+"Show me what Platform Framework accomplished this week"
+```
+
+Claude Code will:
+- Automatically calculate the date range (last Wednesday through today)
+- Query JIRA for your team's completed work
+- Analyze and categorize issues into meaningful sections
+- Generate a formatted report with statistics and insights
+
+**The report includes:**
+- 📊 Summary statistics (total issues, breakdown by type)
+- ✅ Accomplishments (security, quality, product features, infrastructure)
+- ⚠️ Risks and blockers
+- 🤝 Cross-team dependencies
+- 👥 Team health indicators
+
+**For more details and customization options**, see the [JIRA MCP documentation](packages/hcc-jira-mcp/README.md#use-case-generating-weekly-team-reports).
 
 ## Available MCP Servers
 
 - **hcc-patternfly-data-view** - Model Context Protocol server for all PatternFly packages, providing comprehensive component documentation, source code access, module discovery, and CSS utility integration
+- **hcc-jira-mcp** - Model Context Protocol server for JIRA integration, enabling AI assistants to search issues, retrieve details, and generate team reports
 
-📋 **For detailed MCP server documentation and standalone usage**, see: [packages/hcc-pf-mcp/README.md](packages/hcc-pf-mcp/README.md)
+📋 **For detailed MCP server documentation and standalone usage**, see:
+- PatternFly MCP: [packages/hcc-pf-mcp/README.md](packages/hcc-pf-mcp/README.md)
+- JIRA MCP: [packages/hcc-jira-mcp/README.md](packages/hcc-jira-mcp/README.md)
 
 ### MCP Server Tools
 
 When the plugin is installed, these MCP tools become available:
+
+#### JIRA Integration
+- **search_jira_issues** - Search for JIRA issues using JQL (JIRA Query Language), retrieve issue details, and analyze team work
 
 #### Data View Documentation and Examples
 - **getPatternFlyDataViewDescription** - Get comprehensive documentation about @patternfly/react-data-view package capabilities

@@ -30,7 +30,8 @@ storybook-specialist.mdc
 typescript-type-refiner.mdc
 unit-test-writer.mdc
 react-patternfly-code-quality-scanner.mdc
-dependency-cleanup-agent.mdc"
+dependency-cleanup-agent.mdc
+weekly-report.mdc"
 fi
 
 echo "⬇️  Downloading agents..."
@@ -87,8 +88,16 @@ echo ""
 echo "💡 To set up MCP tools:"
 echo "  1. Open Cursor Settings (Cmd/Ctrl + ,)"
 echo "  2. Navigate to General > MCP"
-echo "  3. Add this MCP server:"
-echo "     Command: npx"
-echo "     Args: @redhat-cloud-services/hcc-pf-mcp"
+echo "  3. Add these MCP servers:"
+echo ""
+echo "     PatternFly MCP (for component documentation):"
+echo "       Command: npx"
+echo "       Args: @redhat-cloud-services/hcc-pf-mcp"
+echo ""
+echo "     JIRA MCP (for weekly reports and issue tracking):"
+echo "       Command: npx"
+echo "       Args: -y @redhat-cloud-services/hcc-jira-mcp"
+echo "       Env: JIRA_BASE_URL=https://issues.redhat.com"
+echo "            JIRA_API_TOKEN=<your-api-token>"
 echo ""
 echo "🔗 For more info: https://github.com/RedHatInsights/platform-frontend-ai-toolkit"
