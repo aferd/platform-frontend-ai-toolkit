@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { McpTool, JiraContext } from "../types";
 
 const SearchIssuesSchema = z.object({
@@ -33,15 +34,10 @@ export function getIssueTool(context: JiraContext): McpTool {
 
         if (!response.ok) {
           const errorText = await response.text();
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Failed to search JIRA issues: ${response.status} ${response.statusText}\n${errorText}`
-              }
-            ],
-            isError: true
-          };
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to search JIRA issues: ${response.status} ${response.statusText}\n${errorText}`
+          );
         }
 
         const searchResult = await response.json() as any;
@@ -77,15 +73,13 @@ export function getIssueTool(context: JiraContext): McpTool {
           ]
         };
       } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error searching JIRA issues: ${(error as Error).message}`
-            }
-          ],
-          isError: true
-        };
+        if (error instanceof McpError) {
+          throw error;
+        }
+        throw new McpError(
+          ErrorCode.InternalError,
+          `Error searching JIRA issues: ${(error as Error).message}`
+        );
       }
     }
   ];

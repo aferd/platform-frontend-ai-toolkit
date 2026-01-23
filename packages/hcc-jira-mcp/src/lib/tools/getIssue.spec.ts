@@ -303,7 +303,7 @@ describe('getIssueTool', () => {
     });
 
     it('should handle API errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         statusText: 'Bad Request',
@@ -311,22 +311,18 @@ describe('getIssueTool', () => {
       });
 
       const [, , handler] = getIssueTool(mockContext);
-      const result = await handler({ jql: 'invalid jql syntax' });
 
-      expect(result.content[0].text).toContain('Failed to search JIRA issues');
-      expect(result.content[0].text).toContain('400 Bad Request');
-      expect(result.isError).toBe(true);
+      await expect(handler({ jql: 'invalid jql syntax' })).rejects.toThrow('Failed to search JIRA issues');
+      await expect(handler({ jql: 'invalid jql syntax' })).rejects.toThrow('400 Bad Request');
     });
 
     it('should handle network errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       const [, , handler] = getIssueTool(mockContext);
-      const result = await handler({ jql: 'project=RHCLOUD' });
 
-      expect(result.content[0].text).toContain('Error searching JIRA issues');
-      expect(result.content[0].text).toContain('Network error');
-      expect(result.isError).toBe(true);
+      await expect(handler({ jql: 'project=RHCLOUD' })).rejects.toThrow('Error searching JIRA issues');
+      await expect(handler({ jql: 'project=RHCLOUD' })).rejects.toThrow('Network error');
     });
 
     it('should handle unauthorized errors', async () => {
@@ -338,10 +334,8 @@ describe('getIssueTool', () => {
       });
 
       const [, , handler] = getIssueTool(mockContext);
-      const result = await handler({ jql: 'project=RHCLOUD' });
 
-      expect(result.content[0].text).toContain('401 Unauthorized');
-      expect(result.isError).toBe(true);
+      await expect(handler({ jql: 'project=RHCLOUD' })).rejects.toThrow('401 Unauthorized');
     });
   });
 
