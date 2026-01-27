@@ -3,13 +3,6 @@
     "hcc-patternfly-data-view": {
       "command": "npx",
       "args": ["@redhat-cloud-services/hcc-pf-mcp"]
-    },
-    "jira": {
-      "command": "npx",
-      "args": ["-y", "@redhat-cloud-services/hcc-jira-mcp"],
-      "env": {
-        "JIRA_BASE_URL": "https://issues.redhat.com"
-      }
     }
   }
 }

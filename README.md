@@ -197,8 +197,35 @@ The toolkit includes a powerful weekly reporting feature that automatically anal
 
 **Prerequisites:**
 1. Install the HCC Frontend AI Toolkit plugin (see Getting Started above)
-2. Configure the JIRA MCP server (see [JIRA MCP Setup](packages/hcc-jira-mcp/README.md#quick-start))
-3. Reload Claude Code/VSCode
+2. Configure the [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) MCP server
+3. Set up your JIRA credentials (see below)
+4. Reload Claude Code/VSCode
+
+**Setting up JIRA MCP Server:**
+
+Add the following to your Claude Code MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "npx",
+      "args": ["-y", "@sooperset/mcp-atlassian"],
+      "env": {
+        "JIRA_BASE_URL": "https://issues.redhat.com",
+        "JIRA_PERSONAL_TOKEN": "your-jira-personal-access-token"
+      }
+    }
+  }
+}
+```
+
+**Getting your JIRA Personal Access Token:**
+1. Log in to your JIRA instance
+2. Go to your Profile Settings
+3. Navigate to Security → Create and manage API tokens
+4. Create a new token and copy it
+5. Use this token as the value for `JIRA_PERSONAL_TOKEN`
 
 **Basic Usage:**
 
@@ -221,23 +248,16 @@ Claude Code will:
 - 🤝 Cross-team dependencies
 - 👥 Team health indicators
 
-**For more details and customization options**, see the [JIRA MCP documentation](packages/hcc-jira-mcp/README.md#use-case-generating-weekly-team-reports).
-
 ## Available MCP Servers
 
 - **hcc-patternfly-data-view** - Model Context Protocol server for all PatternFly packages, providing comprehensive component documentation, source code access, module discovery, and CSS utility integration
-- **hcc-jira-mcp** - Model Context Protocol server for JIRA integration, enabling AI assistants to search issues, retrieve details, and generate team reports
 
 📋 **For detailed MCP server documentation and standalone usage**, see:
 - PatternFly MCP: [packages/hcc-pf-mcp/README.md](packages/hcc-pf-mcp/README.md)
-- JIRA MCP: [packages/hcc-jira-mcp/README.md](packages/hcc-jira-mcp/README.md)
 
 ### MCP Server Tools
 
 When the plugin is installed, these MCP tools become available:
-
-#### JIRA Integration
-- **search_jira_issues** - Search for JIRA issues using JQL (JIRA Query Language), retrieve issue details, and analyze team work
 
 #### Data View Documentation and Examples
 - **getPatternFlyDataViewDescription** - Get comprehensive documentation about @patternfly/react-data-view package capabilities

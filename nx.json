@@ -52,8 +52,7 @@
   },
   "release": {
     "projects": [
-      "@redhat-cloud-services/hcc-pf-mcp",
-      "@redhat-cloud-services/hcc-jira-mcp"
+      "@redhat-cloud-services/hcc-pf-mcp"
     ],
     "changelog": {
       "projectChangelogs": {
