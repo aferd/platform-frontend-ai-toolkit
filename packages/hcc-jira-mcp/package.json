@@ -1,6 +1,6 @@
 {
   "name": "@redhat-cloud-services/hcc-jira-mcp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "HCC JIRA MCP package",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
