@@ -62,12 +62,15 @@ Organize your findings into these sections:
 ### 1. Outcome, Accomplishments, Celebrations
 Analyze completed issues and categorize them into:
 
-- **Incidents & Support**: Customer escalations, incidents, support exceptions, or critical support updates
+- **Infrastructure & Platform Stability**: Production deployments, infrastructure migrations, platform improvements, namespace/cluster work
 - **Security & Compliance**: CVE progress, overdue bugs, security posture improvements, compliance milestones
 - **Quality / Stability / Reliability**: Bug fixes, SLO improvements, automation, tech debt reduction, reliability improvements
-- **Future Sustainability**: Team development, upstream involvement, proactive architecture work, cross-team effectiveness initiatives
 - **Product / Portfolio Work**: Product or component roadmap features, new functionality delivered
+- **Future Sustainability**: Team development, upstream involvement, proactive architecture work, cross-team effectiveness initiatives
+- **Incidents & Support (Toil Work)**: Customer escalations, incidents, support exceptions, unplanned work, or critical support updates
 - **AI**: AI adoption initiatives, productivity improvements, learning activities, integration progress
+
+Note: Only include categories that have actual work completed. Use "No items this week" for empty categories only if specifically relevant.
 
 ### 2. Risks, Blockers, Challenges, Issues
 Identify and highlight:
@@ -126,12 +129,108 @@ When the user requests a weekly report:
 
 ## Output Format
 
-Present the report in clean markdown format with:
-- Clear section headers
-- Bullet points for each item
-- JIRA issue references in format `[KEY](URL)` for easy navigation
-- Summary statistics at the top (e.g., total issues closed, breakdown by type)
-- Professional, concise language suitable for management review
+**CRITICAL**: Generate clean, properly formatted markdown that converts perfectly to Google Docs. Follow these strict formatting rules:
+
+### Formatting Requirements
+
+1. **Headers**: Use proper markdown headers with `#` symbols (NO leading spaces or indentation)
+   - `# Title` for main title
+   - `## Section Name` for major sections
+   - `### Subsection Name` for subsections
+
+2. **Links**: ALWAYS format JIRA issues as markdown links (NEVER use plain URLs)
+   - ✅ CORRECT: `[RHCLOUD-12345](https://issues.redhat.com/browse/RHCLOUD-12345)`
+   - ❌ WRONG: `https://issues.redhat.com/browse/RHCLOUD-12345`
+
+3. **Bold Text**: Use `**text**` for emphasis (team names, key terms, metrics)
+   - Example: `**Total Issues:** 31`
+
+4. **No Leading Spaces**: NEVER add leading spaces or indentation to any line
+   - Headers should start at column 0
+   - Bullet points should start at column 0 (with `-` or `*`)
+   - Paragraphs should start at column 0
+
+5. **Bullet Lists**: Use `-` followed by space for all bullet points
+   - Use nested bullets with 2-space indentation only when absolutely necessary
+
+6. **Horizontal Rules**: Use `---` on its own line (with blank lines before and after)
+
+7. **Line Spacing**: Add blank lines between sections for readability
+
+### Report Structure Template
+
+```markdown
+# [Team Name] - Weekly Report
+
+**Report Period:** Wednesday, [Date] - [Day], [Date]
+
+## Summary Statistics
+
+- **Total Issues Closed/Release Pending:** X
+- **Closed:** X
+- **Release Pending:** X
+- **Critical Priority:** X
+- **Major Priority:** X
+- **Normal Priority:** X
+
+---
+
+## 1. Outcome, Accomplishments, Celebrations
+
+### [Category Name]
+
+[Brief introduction paragraph if needed]
+
+- [JIRA-123](https://issues.redhat.com/browse/JIRA-123) - Description
+- [JIRA-456](https://issues.redhat.com/browse/JIRA-456) - Description
+
+### [Next Category]
+
+...
+
+---
+
+## 2. Risks, Blockers, Challenges, Issues
+
+### [Risk Category]
+
+[Description paragraph]
+
+**Key point:** Additional emphasis
+
+---
+
+## 3. Peer Requests
+
+### Cross-Team Coordination Needed
+
+- **Team Name:** Description with context
+- **Another Team:** Description
+
+---
+
+## 4. Associate Wellness & Development
+
+### Kudos/Recognition
+
+**[Person Name]** delivered exceptional work...
+
+### [Other subsections as needed]
+
+...
+```
+
+### Quality Checklist
+
+Before outputting the report, verify:
+- ✅ All JIRA issues are formatted as `[KEY](URL)` links
+- ✅ No lines start with spaces (except 2-space indented nested bullets)
+- ✅ Headers use `#`, `##`, `###` syntax
+- ✅ Bold emphasis uses `**text**` format
+- ✅ Horizontal rules (`---`) have blank lines around them
+- ✅ Professional, concise language suitable for management review
+- ✅ Summary statistics at the top
+- ✅ File can be directly converted to Google Docs without manual cleanup
 
 ## Important Notes
 
