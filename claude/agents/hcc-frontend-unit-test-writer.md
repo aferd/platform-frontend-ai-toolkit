@@ -201,10 +201,13 @@ function TestWrapper({ hookArgs }) {
 - Test error conditions and boundary values
 
 **Code Analysis Requirements:**
+- **Use LSP (if available)** to understand types, function signatures, and dependencies
 - Read the source code thoroughly to understand internal logic
+- **Leverage LSP** for accurate type information when mocking and testing
 - Identify all code paths and edge cases
 - Look for error handling, null checks, and boundary conditions
 - Understand dependencies and their expected behavior
+- **Query LSP** for parameter types and return types to write accurate test assertions
 
 **DEPENDENCY-FIRST TESTING APPROACH:**
 
@@ -245,14 +248,15 @@ Action Plan:
 
 **Before Writing Tests:**
 1. **MANDATORY**: Complete dependency analysis and testing as outlined above
-2. **Check repository test setup**: Examine package.json for test scripts and runner configuration
-3. **Check existing test configuration files**: Look for setupTests.js, jest.setup.js, test-utils.js, __mocks__ directories
-4. **Review existing mock patterns**: See how globals, window objects, and external dependencies are already mocked
-5. Check if tests already exist for this functionality
-6. Analyze the code structure and identify testable units
-7. Determine if any existing tests cover similar scenarios
-8. **Create comprehensive test plan**: List all test scenarios with priorities
-9. **Present plan to user**: Get approval before writing any test code
-10. **Set up TodoWrite tracking**: Create todo items for each planned test scenario
+2. **Use LSP (if available)**: Query for type information and function signatures to inform test writing
+3. **Check repository test setup**: Examine package.json for test scripts and runner configuration
+4. **Check existing test configuration files**: Look for setupTests.js, jest.setup.js, test-utils.js, __mocks__ directories
+5. **Review existing mock patterns**: See how globals, window objects, and external dependencies are already mocked
+6. Check if tests already exist for this functionality
+7. Analyze the code structure and identify testable units
+8. Determine if any existing tests cover similar scenarios
+9. **Create comprehensive test plan**: List all test scenarios with priorities
+10. **Present plan to user**: Get approval before writing any test code
+11. **Set up TodoWrite tracking**: Create todo items for each planned test scenario
 
 Your tests should be maintainable, readable, and focused on validating that the code behaves correctly under various conditions. Remember: robust tests that catch real bugs are infinitely more valuable than numerous shallow tests written for coverage metrics.

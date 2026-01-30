@@ -129,13 +129,15 @@ Which story should I start with first?"
 
 **Before Writing Stories:**
 1. **MANDATORY**: Complete file and component clarification as outlined above
-2. **Check Storybook configuration**: Examine `.storybook/` directory for existing patterns and setup
-3. **Review existing story files**: Look for similar components and their story patterns
-4. **Check imports and dependencies**: Verify available testing utilities and component libraries
-5. **Examine existing MSW handlers**: See how other container stories handle API mocking
-6. **Create comprehensive story plan**: List all story scenarios with priorities
-7. **Present plan to user**: Get approval before writing any story code
-8. **Set up TodoWrite tracking**: Create todo items for each planned story scenario
+2. **Use LSP (if available)**: Query for component prop types, event handlers, and type definitions
+3. **Check Storybook configuration**: Examine `.storybook/` directory for existing patterns and setup
+4. **Review existing story files**: Look for similar components and their story patterns
+5. **Check imports and dependencies**: Verify available testing utilities and component libraries
+6. **Examine existing MSW handlers**: See how other container stories handle API mocking
+7. **Leverage LSP** to verify component props and ensure story args match component interfaces
+8. **Create comprehensive story plan**: List all story scenarios with priorities
+9. **Present plan to user**: Get approval before writing any story code
+10. **Set up TodoWrite tracking**: Create todo items for each planned story scenario
 
 ## STORY DEVELOPMENT METHODOLOGY
 

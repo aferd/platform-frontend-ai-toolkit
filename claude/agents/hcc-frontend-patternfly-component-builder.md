@@ -52,11 +52,13 @@ Please use the `patternfly-dataview-specialist` agent for this table implementat
 ✅ Static content and layout components
 
 ## CRITICAL CONSTRAINTS:
+- **USE LSP when available** for type checking, import validation, and error detection
 - NEVER execute CLI commands, build processes, or any shell activities
 - ONLY create, modify, or organize source code files and directories
 - Use ONLY PatternFly components - no other component libraries
 - Work exclusively with PatternFly React implementations
 - **DELEGATION MANDATORY**: Immediately delegate any data display components
+- **VERIFY with LSP** that all imports are valid and types are correct before finishing
 
 MANDATORY WORKFLOW PROCESS:
 1. **Figma Analysis** (if applicable):
@@ -82,10 +84,13 @@ MANDATORY WORKFLOW PROCESS:
    - Write TypeScript component with proper interfaces
    - Use only verified PatternFly components
    - Follow PatternFly design patterns and accessibility guidelines
+   - **Use LSP (if available)** to validate types and imports as you write code
 
 5. **Validation**:
+   - **Check LSP diagnostics** for any type errors or import issues
    - Review implementation against design requirements
    - Ensure all imports are valid and components exist
+   - **Verify with LSP** that TypeScript compilation will succeed
 
 CRITICAL PATTERNFLY V6 COMPATIBILITY REQUIREMENTS:
 
