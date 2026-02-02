@@ -22,12 +22,14 @@ function main() {
     const claudeAgents = fs.readdirSync(claudeAgentsDir)
       .filter(file => file.startsWith('hcc-frontend-') && file.endsWith('.md'));
 
-    // Remove existing cursor rules
+    // Save current cursor rule contents before regeneration
     const existingMdcFiles = fs.readdirSync(cursorRulesDir)
       .filter(file => file.endsWith('.mdc'));
 
+    const originalContents = new Map();
     existingMdcFiles.forEach(file => {
-      fs.unlinkSync(path.join(cursorRulesDir, file));
+      const filePath = path.join(cursorRulesDir, file);
+      originalContents.set(file, fs.readFileSync(filePath, 'utf8'));
     });
 
     // Regenerate cursor rules (silently)
@@ -51,30 +53,54 @@ function main() {
       process.exit(1);
     }
 
-    // Check for git changes
-    let finalStatus;
-    try {
-      finalStatus = execSync('git status --porcelain cursor/rules/', { encoding: 'utf8' });
-    } catch (error) {
-      console.log('✅ Cursor rules are in sync');
-      return;
-    }
+    // Compare regenerated files with original contents
+    const changedFiles = [];
+    const newFiles = [];
+    const deletedFiles = [];
 
-    if (finalStatus.trim()) {
-      console.error('❌ Cursor rules are out of sync with Claude agents!');
-      console.error('\nFiles with changes:');
-      console.error(finalStatus);
-      console.error('\nFix: npm run convert-cursor && git add cursor/rules/');
+    // Check for modified or new files
+    cursorRules.forEach(file => {
+      const filePath = path.join(cursorRulesDir, file);
+      const newContent = fs.readFileSync(filePath, 'utf8');
 
-      try {
-        const diff = execSync('git diff cursor/rules/', { encoding: 'utf8' });
-        if (diff.trim()) {
-          console.error('\nDiff:');
-          console.error(diff);
+      if (originalContents.has(file)) {
+        if (originalContents.get(file) !== newContent) {
+          changedFiles.push(file);
         }
-      } catch (error) {
-        // Ignore diff errors
+      } else {
+        newFiles.push(file);
       }
+    });
+
+    // Check for deleted files
+    originalContents.forEach((_, file) => {
+      if (!cursorRules.includes(file)) {
+        deletedFiles.push(file);
+      }
+    });
+
+    // Report results
+    if (changedFiles.length > 0 || newFiles.length > 0 || deletedFiles.length > 0) {
+      console.error('❌ Cursor rules are out of sync with Claude agents!');
+      console.error('\nRegenerating produced different files:');
+
+      if (changedFiles.length > 0) {
+        console.error(`\nModified files (${changedFiles.length}):`);
+        changedFiles.forEach(f => console.error(`  - ${f}`));
+      }
+
+      if (newFiles.length > 0) {
+        console.error(`\nNew files (${newFiles.length}):`);
+        newFiles.forEach(f => console.error(`  - ${f}`));
+      }
+
+      if (deletedFiles.length > 0) {
+        console.error(`\nDeleted files (${deletedFiles.length}):`);
+        deletedFiles.forEach(f => console.error(`  - ${f}`));
+      }
+
+      console.error('\n💡 Fix: npm run convert-cursor');
+      console.error('   Then stage the changes: git add cursor/rules/');
 
       process.exit(1);
     }
