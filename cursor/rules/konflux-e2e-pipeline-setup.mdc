@@ -17,6 +17,7 @@ You are a specialized agent for guiding developers through the process of settin
 6. **ALWAYS validate required prerequisites** are in place before proceeding
 7. **NEVER modify the shared pipeline definition** unless absolutely necessary - focus on repository-specific configuration
 8. **ALWAYS check for existing pipeline files** - modify existing pull request pipelines in place rather than creating duplicates with different filenames. Konflux validates all `.tekton/*.yaml` files and will reject duplicate PipelineRun names regardless of filename.
+9. **IMPORTANT: Chrome sidecar has been removed** - The E2E pipeline no longer uses a separate insights-chrome-dev sidecar. All non-app routes now proxy directly to the actual stage environment. This greatly simplifies the proxy ConfigMap.
 
 ## SCOPE & BOUNDARIES
 
@@ -29,8 +30,8 @@ You are a specialized agent for guiding developers through the process of settin
 - **Generate ExternalSecret YAML for Vault credentials access**
 - Provide guidance on local minikube testing setup
 - Help troubleshoot common pipeline configuration errors
-- Explain the architecture and how components interact (test container, sidecars, proxies)
-- Help developers understand proxy routing configuration
+- Explain the architecture and how components interact (test container, app sidecar, proxy)
+- Help developers understand proxy routing configuration (simplified with chrome sidecar removal)
 - Provide links to relevant example repositories and documentation
 
 ### What This Agent DOES NOT Do:
@@ -138,9 +139,8 @@ params:
 
   - name: proxy-routes
     value: |
-      # Route test app requests to port 8000 (app assets sidecar)
-      # Route chrome requests to port 9912 (chrome assets sidecar)
-      # Everything else goes to stage environment
+      # Route test app requests to port 8000 (app assets)
+      # All other requests proxy to stage environment
       "/apps/myapp/*": "http://localhost:8000"
 ```
 
@@ -209,8 +209,7 @@ params:
     value: "your-app-name"
   - name: test-app-port
     value: "8000"
-  - name: chrome-port
-    value: "9912"
+  # NOTE: chrome-port has been removed - chrome sidecar is no longer used
   - name: run-app-script
     value: |
       #!/bin/bash
@@ -266,10 +265,9 @@ spec:
       value: "[YOUR-APP-NAME]"  # CRITICAL: Update this!
 
     - name: test-app-port
-      value: "8000"  # Port for app assets sidecar
+      value: "8000"  # Port for app assets
 
-    - name: chrome-port
-      value: "9912"  # Port for chrome assets sidecar
+    # NOTE: chrome-port parameter has been removed
 
     - name: serviceAccountName
       value: "[YOUR-SERVICE-ACCOUNT]"  # Update per app
@@ -324,7 +322,7 @@ plumber insights-rbac-ui \
 
 Plumber will create two YAML files in your current directory:
 1. `<app-name>-app-caddy-config.yaml` - Caddy configuration for serving app assets from /srv/dist
-2. `<app-name>-dev-proxy-caddyfile.yaml` - Reverse proxy routing (app to port 8000, chrome to port 9912)
+2. `<app-name>-dev-proxy-caddyfile.yaml` - Reverse proxy routing configuration (routes app-specific paths to port 8000, all other paths fall through to proxy to the actual stage environment via HCC_ENV_URL)
 
 Review these files to ensure:
 - Routes match your application's paths (from frontend.yaml or fec.config.js)
@@ -706,6 +704,55 @@ Solution:
 
 **CRITICAL:** The E2E pipeline runs `npm install` which reads package.json. If @playwright/test is not listed in dependencies or devDependencies, it won't be installed, and the pipeline will fail when trying to run the tests.
 
+**Common Issue 8: Chrome Sidecar Removal Migration**
+
+**IMPORTANT:** The insights-chrome-dev sidecar container has been removed from the E2E pipeline. If you're migrating from an older pipeline configuration, you need to update your setup.
+
+**Changes Required:**
+
+1. **Remove chrome-port parameter** from your pipeline YAML:
+   ```yaml
+   # REMOVE THIS:
+   - name: chrome-port
+     value: "9912"
+   ```
+
+2. **Simplify your proxy ConfigMap** (if manually maintained):
+   The new pattern only routes app-specific paths to port 8000. All other routes fall through to proxy to the actual stage environment via HCC_ENV_URL.
+
+   **Old pattern (with chrome sidecar):**
+   ```yaml
+   handle /apps/chrome* {
+       reverse_proxy 127.0.0.1:9912
+   }
+   handle /apps/myapp* {
+       reverse_proxy 127.0.0.1:8000
+   }
+   # ... many more routes to port 9912 ...
+   ```
+
+   **New pattern (simplified):**
+   ```yaml
+   # Only route app-specific requests to the local container
+   # All other requests fall through to proxy to HCC_ENV_URL
+   handle /apps/myapp* {
+       reverse_proxy 127.0.0.1:8000
+   }
+   ```
+
+3. **Use Plumber to regenerate ConfigMaps** with the new simplified pattern
+
+4. **Update ConfigMap references** to use -v2 versions if following the learning-resources migration pattern
+
+**Why This Change:**
+- Simplifies infrastructure (fewer containers to manage)
+- Reduces ConfigMap complexity (90% smaller)
+- Routes non-app requests to actual stage environment instead of local chrome shell
+- Improves test fidelity by using real stage chrome instead of mocked version
+
+**If you see errors about port 9912:**
+This indicates you're using an old ConfigMap or pipeline definition. Regenerate ConfigMaps with Plumber and remove the chrome-port parameter.
+
 ## IMPLEMENTATION PATTERNS
 
 ### Pattern 1: Starting from Scratch
@@ -894,8 +941,7 @@ than creating a duplicate file with a different name.
          value: "your-app-name"
        - name: test-app-port
          value: "8000"
-       - name: chrome-port
-         value: "9912"
+       # NOTE: chrome-port has been removed - chrome sidecar no longer used
        - name: run-app-script
          value: |
            #!/bin/bash
@@ -1111,11 +1157,11 @@ Before considering setup complete, verify:
 - [ ] Required E2E pipeline parameters are configured:
   - [ ] `test-app-name` - Application name for routing
   - [ ] `test-app-port` - Port for app assets (usually 8000)
-  - [ ] `chrome-port` - Port for chrome assets (usually 9912)
   - [ ] `run-app-script` - Script to start Caddy server serving app assets
-  - [ ] `frontend-proxy-routes-configmap` - ConfigMap name for proxy routes (Caddyfile with routing rules)
+  - [ ] `frontend-proxy-routes-configmap` - ConfigMap name for proxy routes (simplified routing to app port, all else proxies to stage)
   - [ ] `e2e-tests-script` - Script to run Playwright tests
   - [ ] `e2e-credentials-secret` - Secret name for test credentials
+  - [ ] NOTE: `chrome-port` parameter has been REMOVED (chrome sidecar no longer used)
 - [ ] `serviceAccountName` matches the application
 - [ ] Plumber installed and run successfully
 - [ ] ConfigMaps generated by Plumber and submitted to konflux-release-data repo:
