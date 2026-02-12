@@ -323,14 +323,42 @@ plumber insights-rbac-ui \
 
 **7c. Verify Generated ConfigMaps**
 
+**CRITICAL**: Plumber is designed for **federated modules only** (micro-frontends loaded into a shell, NOT standalone applications). Ensure your application is a federated module before proceeding.
+
 Plumber will create two YAML files in your current directory:
 1. `<app-name>-app-caddy-config.yaml` - Caddy configuration for serving app assets from /srv/dist
 2. `<app-name>-dev-proxy-caddyfile.yaml` - Reverse proxy routing configuration (routes app-specific paths to port 8000, all other paths fall through to proxy to the actual stage environment via HCC_ENV_URL)
 
-Review these files to ensure:
-- Routes match your application's paths (from frontend.yaml or fec.config.js)
-- Namespace is correct
-- ConfigMap names match what you specified in the pipeline
+**Recommended Validation Workflow:**
+
+🚫 **DO NOT manually review ConfigMaps yourself** - this is error-prone and defeats the purpose of automation.
+
+✅ **Instead, ask this agent (or Claude) to review the generated ConfigMaps:**
+
+```
+"Please review the generated ConfigMaps at <path-to-files> and check for:
+- Errant navigation paths in the proxy ConfigMap
+- Overly broad route patterns
+- Routes that should be in the chrome shell instead of my app"
+```
+
+**The agent will check for:**
+- Navigation routes (like `/iam/*`, `/settings/*`, `/insights/*`) that shouldn't be in the proxy ConfigMap
+- Overly broad paths missing app-specific prefixes (e.g., `/settings*` instead of `/settings/myapp*`)
+- Missing wildcards on app routes (should be `/apps/myapp*` not `/apps/myapp`)
+- Routes that should go to the chrome shell being incorrectly sent to your app (port 8000)
+
+**If Issues are Found:**
+1. 🚫 **DO NOT manually edit the ConfigMap** - this is a critical anti-pattern
+2. ✅ **Submit an issue to Plumber**: https://github.com/catastrophe-brandon/plumber/issues
+   - Include the generated ConfigMap content
+   - Describe what routes are incorrect
+   - Include your `frontend.yaml` or `fec.config.js` content
+   - The Plumber maintainers will fix the generation logic
+
+**Basic checks (ConfigMap names and namespace):**
+- ConfigMap names match what you specified in the pipeline parameters
+- Namespace is correct for your Konflux tenant
 
 **7d. Submit ConfigMaps to konflux-release-data**
 
@@ -585,15 +613,28 @@ Symptoms:
 - 404 errors in test logs
 - Assets not loading correctly
 - Incorrect pages being served
+- Errant navigation paths appearing in routes
 
 Solution:
-1. If you used Plumber, verify your frontend.yaml or fec.config.js has correct routes
-2. Re-run Plumber if configuration files were updated
-3. Use `podman run` to inspect container filesystem and verify `/srv/dist` path
-4. Test Caddy config syntax: https://caddyserver.com/docs/caddyfile
-5. Verify `proxy-routes` correctly maps to port 8000
-6. Check chrome routes map to port 9912
-7. If manually created ConfigMaps, compare against Plumber-generated output
+1. 🚫 **DO NOT manually edit ConfigMaps** to fix routing issues
+2. ✅ **Ask this agent (or Claude) to review your generated ConfigMaps:**
+   ```
+   "Please review the ConfigMaps at <path> and check for:
+   - Errant navigation paths
+   - Routes that should be in chrome shell
+   - Overly broad path patterns"
+   ```
+3. If the agent identifies issues with Plumber-generated ConfigMaps:
+   - ✅ Submit an issue to Plumber: https://github.com/catastrophe-brandon/plumber/issues
+   - Include the generated ConfigMap content
+   - Include your `frontend.yaml` or `fec.config.js` content
+   - Describe the expected vs. actual routing behavior
+4. If the source files (`frontend.yaml` or `fec.config.js`) have incorrect routes:
+   - Fix the source file
+   - Re-run Plumber to regenerate ConfigMaps
+   - Have the agent review the new output
+5. Use `podman run` to inspect container filesystem and verify `/srv/dist` path
+6. Verify the proxy ConfigMap only routes app-specific paths to port 8000 (not navigation paths)
 
 **Common Issue 6: Missing Required Pipeline Parameters**
 
@@ -1098,11 +1139,21 @@ Agent: "Let's gather more information first:
 4. What does the Konflux UI show for this pipeline run?"
 ```
 
-### Anti-Pattern 6: Manually Writing ConfigMaps
+### Anti-Pattern 6: Manually Writing or Editing ConfigMaps
 **DON'T:**
 ```
 Agent: "Let me help you write the ConfigMap YAML by hand. You'll need to
 list all your routes and configure the Caddy syntax..."
+
+# OR
+
+Agent: "I see an issue in your ConfigMap. Let me manually edit it to fix
+the routing problem..."
+
+# OR
+
+Developer: "The routes look wrong. I'll just manually edit the ConfigMap
+to fix it."
 ```
 
 **DO:**
@@ -1116,7 +1167,25 @@ plumber <app-name> <repo-url> \
   --app-configmap-name <app-name>-app-caddy-config \
   --proxy-configmap-name <app-name>-dev-proxy-caddyfile \
   --namespace <namespace>
+
+After generation, let me review the ConfigMaps to check for any issues like
+errant navigation paths or incorrect routing. If I find problems with the
+generated output, I'll help you submit an issue to the Plumber repository
+so the generation logic can be improved."
 ```
+
+**Why This Matters:**
+- Manual editing creates configuration drift
+- Changes are lost when ConfigMaps are regenerated
+- Issues in Plumber's generation logic don't get reported/fixed
+- Defeats the purpose of automated configuration management
+- Makes troubleshooting harder when configs are inconsistent
+
+**Correct Workflow:**
+1. Generate ConfigMaps with Plumber
+2. Ask Claude/this agent to review the output
+3. If issues are found, report to Plumber: https://github.com/catastrophe-brandon/plumber/issues
+4. Fix source files if needed and regenerate
 
 ### Anti-Pattern 7: Creating Duplicate Pipeline Files
 **DON'T:**
