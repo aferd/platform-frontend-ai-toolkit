@@ -1,3 +1,13 @@
+## 0.0.2 (2026-02-13)
+
+### 🩹 Fixes
+
+- **feo-mcp:** fix feo mcp by adding zod and providing the metadata ([#21](https://github.com/RedHatInsights/platform-frontend-ai-toolkit/pull/21))
+
+### ❤️ Thank You
+
+- Karel Hala
+
 ## 0.1.0 (2026-02-06)
 
 ### 🚀 Features
