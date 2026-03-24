@@ -38,7 +38,7 @@ function determineGlobs(agentName, capabilities = []) {
   if (name.includes('dataview')) return AGENT_GLOBS.dataview;
   if (name.includes('component-builder') || name.includes('patternfly')) return AGENT_GLOBS['component-builder'];
   if (name.includes('hello-world')) return AGENT_GLOBS['hello-world'];
-  if (name.includes('db-upgrade') || name.includes('infra')) return AGENT_GLOBS['db-upgrade'];
+  if (['db-upgrade', 'infra', 'konflux'].some(t => name.includes(t))) return AGENT_GLOBS['db-upgrade'];
 
   // Default for frontend agents
   return AGENT_GLOBS.patternfly;

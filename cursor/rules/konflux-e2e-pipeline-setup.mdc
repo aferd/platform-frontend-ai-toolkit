@@ -1,6 +1,6 @@
 ---
 description: "Guide developers through setting up Konflux E2E test pipelines for frontend repositories"
-globs: "**/*.{jsx,tsx,js,ts}"
+globs: "**/*.{yml,yaml}"
 ---
 
 # HCC Frontend Konflux E2E Pipeline Setup Agent

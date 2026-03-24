@@ -138,8 +138,9 @@ Each agent should include:
 1. Create/edit agents in `claude/agents/` directory
 2. Run `npm run convert-cursor` to generate Cursor rules
 3. Verify sync with `npm run check-cursor-sync`
-4. Test in both Claude Code and Cursor (if applicable)
-5. Submit pull request with both Claude and Cursor files
+4. **Bump the version in `claude/.claude-plugin/plugin.json`** — this is required to trigger automated plugin updates for users who have the plugin installed. Without a version bump, their Claude Code will not pick up the new or modified agent. Use semantic versioning: patch for bug fixes, minor for new agents/features, major for breaking changes.
+5. Test in both Claude Code and Cursor (if applicable)
+6. Submit pull request with both Claude and Cursor files
 
 ## Best Practices
 
