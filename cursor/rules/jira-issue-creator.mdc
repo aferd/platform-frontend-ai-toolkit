@@ -71,6 +71,27 @@ Every ticket gets exactly one team label. Bot labels are added separately, only 
 
 Format: `{"customfield_10464": {"value": "Activity Type Name"}}`
 
+## Security Level
+
+By default, do not set a security level — tickets are public.
+
+When the request explicitly mentions "security level", "Red Hat only", "internal only", "confidential", or "Red Hat Employee", set:
+
+```json
+{"security": {"name": "Red Hat Employee"}}
+```
+
+This restricts visibility to Red Hat employees only. Useful for CVE disclosures and sensitive issues that should not be announced publicly before a fix is ready.
+
+**When security level is set:**
+- Dry run: show full preview as normal, but add a warning that the creation response will be restricted
+- After creation: respond with ticket number and URL only — no other fields:
+
+```text
+Created RHCLOUD-XXXX
+View: https://redhat.atlassian.net/browse/RHCLOUD-XXXX
+```
+
 ## Team Field (customfield_10001)
 
 Set team at creation time using the UUID as a **plain string** (look up the correct UUID from the Teams table above):
@@ -166,7 +187,7 @@ When detected:
 
 ## Response Format
 
-After creating:
+After creating (no security level):
 ```text
 Created RHCLOUD-XXXX
 - Type: Story
@@ -175,6 +196,12 @@ Created RHCLOUD-XXXX
 - Labels: platform-experience-services, hcc-ai-framework, repo:insights-chrome
 - Activity Type: Security & Compliance (auto-generated)
 - View: https://redhat.atlassian.net/browse/RHCLOUD-XXXX
+```
+
+After creating (security level set — restricted response):
+```text
+Created RHCLOUD-XXXX
+View: https://redhat.atlassian.net/browse/RHCLOUD-XXXX
 ```
 
 ## Rules
