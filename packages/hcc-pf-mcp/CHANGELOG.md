@@ -1,3 +1,7 @@
+## 0.5.1 (2026-04-17)
+
+This was a version bump only for @redhat-cloud-services/hcc-pf-mcp to align it with other projects, there were no code changes.
+
 ## 0.5.0 (2026-04-01)
 
 This was a version bump only for @redhat-cloud-services/hcc-pf-mcp to align it with other projects, there were no code changes.

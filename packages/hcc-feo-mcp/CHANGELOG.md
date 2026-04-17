@@ -1,3 +1,7 @@
+## 0.2.1 (2026-04-17)
+
+This was a version bump only for @redhat-cloud-services/hcc-feo-mcp to align it with other projects, there were no code changes.
+
 ## 0.2.0 (2026-04-01)
 
 This was a version bump only for @redhat-cloud-services/hcc-feo-mcp to align it with other projects, there were no code changes.
