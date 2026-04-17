@@ -32,7 +32,8 @@ Run all 6 tests in parallel using subagent_type: hcc-frontend-ai-toolkit:hcc-fro
 | Assignee | fetched email via `jira_get_user_profile` (not hardcoded) |
 | Activity Type | Security & Compliance |
 | Team | Console - Framework |
-| Security Level | not set |
+| Security Level | `Red Hat Employee` (auto-set — activity type is Security & Compliance) |
+| Warning shown | yes — agent should note that creation response will be restricted to ticket number + URL |
 
 ---
 
@@ -50,7 +51,8 @@ Run all 6 tests in parallel using subagent_type: hcc-frontend-ai-toolkit:hcc-fro
 | Assignee | fetched email via `jira_get_user_profile` |
 | Activity Type | Security & Compliance |
 | Team | Console - UI |
-| Security Level | not set |
+| Security Level | `Red Hat Employee` (auto-set — activity type is Security & Compliance) |
+| Warning shown | yes — agent should note that creation response will be restricted to ticket number + URL |
 
 ---
 
@@ -90,16 +92,17 @@ Run all 6 tests in parallel using subagent_type: hcc-frontend-ai-toolkit:hcc-fro
 
 ---
 
-## T5 — Security level set
+## T5 — Security level set via explicit phrase
 
 **Prompt:**
-> Dry run: Create a Red Hat Employee only framework team ticket for insights-chrome — CVE in Tekton task bundle digests. Assign to the bot.
+> Dry run: Create a Red Hat Employee only framework team ticket for insights-chrome — update PatternFly to latest major version. Unassigned.
 
 **Expected:**
 
 | Field | Value |
 |-------|-------|
-| Security Level | `Red Hat Employee` |
+| Activity Type | Future Sustainability (upgrade keyword — not Security & Compliance) |
+| Security Level | `Red Hat Employee` (set via explicit phrase — not auto from activity type) |
 | Response format | full dry run preview (restriction applies to post-creation response only) |
 | Warning shown | yes — agent should note that creation response will be restricted to ticket number + URL |
 

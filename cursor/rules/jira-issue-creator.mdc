@@ -75,7 +75,9 @@ Format: `{"customfield_10464": {"value": "Activity Type Name"}}`
 
 By default, do not set a security level — tickets are public.
 
-When the request explicitly mentions "security level", "Red Hat only", "internal only", "confidential", or "Red Hat Employee", set:
+Set security level automatically when **either** condition is true:
+- Activity type resolves to `Security & Compliance`
+- Request explicitly mentions "security level", "Red Hat only", "internal only", "confidential", or "Red Hat Employee"
 
 ```json
 {"security": {"name": "Red Hat Employee"}}
