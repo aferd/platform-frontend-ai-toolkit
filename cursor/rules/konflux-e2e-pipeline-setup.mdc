@@ -90,7 +90,7 @@ You are a specialized agent for guiding developers through the process of settin
    - **CRITICAL:** Verify Playwright is installed in package.json:
      - Check `devDependencies` for `@playwright/test`
      - If missing, add it: `npm install -D @playwright/test`
-     - **Note the version number** (e.g., `"@playwright/test": "^1.40.0"`) - you'll need this for the pipeline configuration
+     - **Note the version number** (e.g., `"@playwright/test": "1.40.0"`) - you'll need this for the pipeline configuration
      - Verify `playwright.config.ts` or `playwright.config.js` exists
      - **CRITICAL:** Verify Playwright config uses sequential execution:
        - Config must include `workers: 1` (forces sequential test execution)
@@ -100,6 +100,23 @@ You are a specialized agent for guiding developers through the process of settin
        - Playwright config should use `PLAYWRIGHT_BASE_URL` or hardcoded URLs
        - HCC_ENV_URL is strictly for pipeline infrastructure only
        - Search for "HCC_ENV_URL" in playwright.config.* - should NOT be found
+   - **CRITICAL:** Install the shared authentication package:
+     - Check `devDependencies` for `@redhat-cloud-services/playwright-test-auth`
+     - If missing, add it: `npm install -D @redhat-cloud-services/playwright-test-auth`
+     - This package provides reusable login/auth code with the following benefits:
+       - Deduplication of login/auth logic across test suites
+       - Sharing of login/auth session across specs and tests
+       - Consistency in approach across tests
+     - **CRITICAL VERSION ALIGNMENT**: Three versions must match:
+       1. The `@playwright/test` version in your repo's package.json
+       2. The playwright version that `@redhat-cloud-services/playwright-test-auth` depends on
+       3. The `e2e-playwright-image` parameter in your pipeline YAML
+       - Check the auth package's required Playwright version: `npm info @redhat-cloud-services/playwright-test-auth peerDependencies`
+       - Install matching Playwright version: `npm install -D @playwright/test@<matching-version>`
+       - Use corresponding Docker image in pipeline: `mcr.microsoft.com/playwright:v<matching-version>-jammy`
+       - Example: If auth package requires Playwright 1.40.0:
+         - package.json: `"@playwright/test": "1.40.0"`
+         - pipeline YAML: `e2e-playwright-image: "mcr.microsoft.com/playwright:v1.40.0-jammy"`
    - Verify test script exists in package.json:
      - Should have a script like `"test:playwright": "playwright test"`
      - If missing, add it to the scripts section
@@ -371,7 +388,11 @@ https://github.com/RedHatInsights/konflux-pipelines/blob/main/pipelines/platform
 - `unit-tests-script` - Script to run unit tests (REQUIRED - MUST validate against package.json scripts section before setting)
 - `e2e-tests-script` - Script to run E2E tests ONLY - no installation commands (REQUIRED)
 - `run-app-script` - Script to start the application (REQUIRED)
-- `e2e-playwright-image` - Playwright Docker image matching package.json version (REQUIRED - has default but should be overridden to match package.json)
+- `e2e-playwright-image` - Playwright Docker image (REQUIRED - has default but MUST be overridden to match three-way version alignment):
+  - MUST match `@playwright/test` version in package.json
+  - MUST match Playwright version required by `@redhat-cloud-services/playwright-test-auth`
+  - Check auth package requirement: `npm info @redhat-cloud-services/playwright-test-auth peerDependencies`
+  - Example: If both use 1.40.0, set to `mcr.microsoft.com/playwright:v1.40.0-jammy`
 - `frontend-proxy-routes-configmap` - ConfigMap name for proxy routes (REQUIRED - has empty default, must be set)
 - `e2e-credentials-secret` - Secret name for credentials (REQUIRED - has empty default, must be set)
 
@@ -428,7 +449,7 @@ params:
 
   # REQUIRED: E2E configuration (technically have defaults but must be set correctly)
   - name: e2e-playwright-image
-    value: "mcr.microsoft.com/playwright:v1.40.0-jammy"  # CRITICAL: Must match @playwright/test version in package.json
+    value: "mcr.microsoft.com/playwright:v1.40.0-jammy"  # CRITICAL: Must match BOTH @playwright/test version in package.json AND @redhat-cloud-services/playwright-test-auth's playwright dependency
 
   - name: frontend-proxy-routes-configmap
     value: "your-app-name-dev-proxy-caddyfile"
@@ -1222,40 +1243,122 @@ Causes:
 - Tests exist but Playwright CLI can't find them
 
 Solution:
-1. Install Playwright as a dev dependency:
+1. **First, check the auth package's required Playwright version**:
    ```bash
-   npm install -D @playwright/test
+   npm info @redhat-cloud-services/playwright-test-auth peerDependencies
+   # This will show the required @playwright/test version
    ```
 
-2. Verify package.json includes the test script:
+2. Install Playwright and the shared authentication package as dev dependencies with matching versions:
+   ```bash
+   # Example: If auth package requires Playwright 1.40.0
+   npm install -D @playwright/test@1.40.0 @redhat-cloud-services/playwright-test-auth
+   ```
+
+3. Verify package.json includes both packages with aligned versions and the test script:
    ```json
    {
      "scripts": {
        "test:playwright": "playwright test"
      },
      "devDependencies": {
-       "@playwright/test": "^1.40.0"
+       "@playwright/test": "1.40.0",  // Must match auth package requirement
+       "@redhat-cloud-services/playwright-test-auth": "^1.0.0"
      }
    }
    ```
 
-3. Ensure playwright.config.ts or playwright.config.js exists:
+4. **Update pipeline to use matching Docker image**:
+   ```yaml
+   - name: e2e-playwright-image
+     value: "mcr.microsoft.com/playwright:v1.40.0-jammy"  # Matches package.json version
+   ```
+
+5. **CRITICAL: Configure playwright.config.ts with shared authentication**:
+
+   Use the frontend-starter-app configuration as a reference template:
+   - Repository: https://github.com/RedHatInsights/frontend-starter-app
+   - Path: `playwright.config.ts`
+
+   Key requirements for all new test suites:
    ```typescript
-   import { defineConfig } from '@playwright/test';
+   import { defineConfig, devices } from '@playwright/test';
 
    export default defineConfig({
      testDir: './playwright',
-     timeout: 60 * 1000,
-     // CRITICAL: Sequential execution prevents race conditions and flaky tests
-     workers: 1,
+
+     /* Run tests in files in parallel */
      fullyParallel: false,
+
+     /* Fail the build on CI if you accidentally left test.only in the source code. */
+     forbidOnly: !!process.env.CI,
+
+     /* Retry on CI only */
+     retries: process.env.CI ? 2 : 0,
+
+     /* CRITICAL: Opt out of parallel tests on CI - use single worker */
+     /* Sequential execution prevents race conditions and flaky tests in CI */
+     workers: 1,
+
+     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+     reporter: 'html',
+
+     /* CRITICAL: Global setup for authentication using shared package */
+     globalSetup: require.resolve('@redhat-cloud-services/playwright-test-auth/global-setup'),
+
+     /* Shared settings for all the projects below */
      use: {
-       // CRITICAL: Use PLAYWRIGHT_BASE_URL, NOT HCC_ENV_URL
-       // HCC_ENV_URL is for pipeline infrastructure only
+       /* Base URL to use in actions like `await page.goto('/')` */
+       /* CRITICAL: Use PLAYWRIGHT_BASE_URL, NOT HCC_ENV_URL */
+       /* HCC_ENV_URL is for pipeline infrastructure only */
        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://stage.foo.redhat.com:1337',
+
+       /* Collect trace when retrying the failed test */
+       trace: 'on-first-retry',
+
+       /* CRITICAL: Ignore HTTPS errors for stage environment */
+       ignoreHTTPSErrors: true,
+
+       /* CRITICAL: Reuse authentication state from global setup */
+       storageState: 'playwright/.auth/user.json',
+     },
+
+     /* Configure projects for major browsers */
+     projects: [
+       {
+         name: 'chromium',
+         use: { ...devices['Desktop Chrome'] },
+       },
+     ],
+
+     /* Timeout for each test */
+     timeout: 120000,
+
+     /* Timeout for each assertion */
+     expect: {
+       timeout: 10000,
      },
    });
    ```
+
+   **Benefits of using @redhat-cloud-services/playwright-test-auth:**
+   - **Deduplication**: Eliminates duplicate login/auth code across test suites
+   - **Session sharing**: Authenticated session state is shared across all specs and tests via `storageState`
+   - **Consistency**: Provides uniform authentication approach across all E2E tests
+   - **Performance**: Reduces test execution time by reusing authentication (login once, test many times)
+
+   **Important configuration settings:**
+   - `workers: process.env.CI ? 1 : undefined` - Single worker in CI prevents race conditions
+   - `globalSetup` - Runs authentication once before all tests
+   - `storageState: 'playwright/.auth/user.json'` - Shares auth state across tests
+   - `ignoreHTTPSErrors: true` - Required for stage environment testing
+   - `baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://stage.foo.redhat.com:1337'` - Uses pipeline-provided URL or fallback
+
+   **Note:** The authentication package automatically reads credentials from environment variables:
+   - `E2E_USER` - Test automation username (injected from e2e-credentials-secret)
+   - `E2E_PASSWORD` - Test automation password (injected from e2e-credentials-secret)
+
+   These credentials are provided by the pipeline through the ExternalSecret configuration (see Step 10).
 
 4. Verify tests exist in the configured directory (default: `playwright/`)
 
@@ -1269,8 +1372,8 @@ Solution:
 **CRITICAL:** The E2E pipeline installs dependencies during the workspace setup phase. If @playwright/test is not listed in package.json dependencies or devDependencies, it won't be installed, and the pipeline will fail when trying to run the tests.
 
 **VERSION COMPATIBILITY:** The `e2e-playwright-image` parameter in your pipeline MUST match the version of `@playwright/test` in your package.json:
-- package.json has `"@playwright/test": "^1.40.0"` → use `e2e-playwright-image: "mcr.microsoft.com/playwright:v1.40.0-jammy"`
-- package.json has `"@playwright/test": "^1.45.0"` → use `e2e-playwright-image: "mcr.microsoft.com/playwright:v1.45.0-jammy"`
+- package.json has `"@playwright/test": "1.40.0"` → use `e2e-playwright-image: "mcr.microsoft.com/playwright:v1.40.0-jammy"`
+- package.json has `"@playwright/test": "1.45.0"` → use `e2e-playwright-image: "mcr.microsoft.com/playwright:v1.45.0-jammy"`
 - The version numbers must align to ensure browser binaries match the Playwright API version
 - Mismatched versions can cause cryptic errors about missing browsers or incompatible APIs
 
@@ -1288,36 +1391,63 @@ or
 ```
 Error: Your version of Playwright does not match the version of installed browsers
 ```
+or
+```text
+Error: Cannot find module '@playwright/test' or version mismatch with @redhat-cloud-services/playwright-test-auth
+```
 
 Causes:
 - The `e2e-playwright-image` parameter in the pipeline uses a different version than `@playwright/test` in package.json
-- Pipeline uses Playwright v1.40.0 but package.json has v1.45.0 (or vice versa)
+- The `@playwright/test` version doesn't match what `@redhat-cloud-services/playwright-test-auth` requires
 - Browser binaries don't match the Playwright API version
+- Three-way version alignment is broken (repo + auth package + docker image)
 
 Solution:
-1. Check the version of `@playwright/test` in your package.json:
+1. **Check the required Playwright version for the auth package**:
+   ```bash
+   npm info @redhat-cloud-services/playwright-test-auth peerDependencies
+   # Output shows required @playwright/test version
+   ```
+
+2. **Check the version of `@playwright/test` in your package.json**:
    ```json
    {
      "devDependencies": {
-       "@playwright/test": "^1.40.0"  // Note this version
+       "@playwright/test": "1.40.0",  // Must match auth package requirement
+       "@redhat-cloud-services/playwright-test-auth": "^1.0.0"
      }
    }
    ```
 
-2. Update the `e2e-playwright-image` parameter in your pipeline to match:
+3. **Update the `e2e-playwright-image` parameter in your pipeline to match**:
    ```yaml
    - name: e2e-playwright-image
-     value: "mcr.microsoft.com/playwright:v1.40.0-jammy"  # Version must match package.json
+     value: "mcr.microsoft.com/playwright:v1.40.0-jammy"  # Version must match package.json AND auth package
    ```
 
-3. Version mapping examples:
+4. **Version mapping examples**:
    - `@playwright/test: "^1.40.0"` → `mcr.microsoft.com/playwright:v1.40.0-jammy`
    - `@playwright/test: "^1.45.0"` → `mcr.microsoft.com/playwright:v1.45.0-jammy`
    - `@playwright/test: "^1.48.0"` → `mcr.microsoft.com/playwright:v1.48.0-jammy`
 
-4. Commit the pipeline change and re-run tests
+5. **If versions don't align, install the matching Playwright version**:
+   ```bash
+   # Example: If auth package requires 1.40.0
+   npm install -D @playwright/test@1.40.0
+   ```
 
-**CRITICAL:** Always keep these versions synchronized. When you upgrade Playwright in package.json, also update the pipeline's e2e-playwright-image parameter.
+6. Commit the changes and re-run tests
+
+**CRITICAL THREE-WAY VERSION ALIGNMENT:**
+All three of these must use the same Playwright version:
+1. `@playwright/test` in your package.json devDependencies
+2. Playwright dependency of `@redhat-cloud-services/playwright-test-auth` (check with `npm info`)
+3. `e2e-playwright-image` parameter in your pipeline YAML
+
+When you upgrade Playwright, you must:
+- Check if the auth package supports the new version
+- Update package.json to match
+- Update the pipeline's e2e-playwright-image parameter
 
 **Common Issue 9: Incorrect Unit Test Command**
 
@@ -1701,7 +1831,13 @@ Solution:
    - Document current repo structure
    - Verify frontend.yaml or fec.config.js exists (needed by Plumber)
    - **CRITICAL**: Read package.json to identify correct unit test command
-   - **CRITICAL**: Check Playwright version in package.json to ensure image version will match
+   - **CRITICAL**: Verify three-way Playwright version alignment:
+     1. Check `@redhat-cloud-services/playwright-test-auth` required Playwright version:
+        ```bash
+        npm info @redhat-cloud-services/playwright-test-auth peerDependencies
+        ```
+     2. Ensure package.json `@playwright/test` matches the auth package requirement
+     3. Note the version number (e.g., "1.40.0") - you'll use this for the pipeline's `e2e-playwright-image` parameter
 
 2. Local Testing Phase (Optional but Recommended):
    - Clone tekton-playwright-e2e starter
@@ -2267,13 +2403,20 @@ Before considering setup complete, verify:
   - [ ] Common patterns checked: `test`, `test:unit`, `test:ci`, `nx run-many -t test`
 - [ ] Playwright dependencies installed:
   - [ ] `@playwright/test` in package.json devDependencies
+  - [ ] **CRITICAL**: `@redhat-cloud-services/playwright-test-auth` in package.json devDependencies
+  - [ ] **CRITICAL THREE-WAY VERSION ALIGNMENT**: All three versions match:
+    - [ ] `@playwright/test` version in package.json (e.g., "^1.40.0")
+    - [ ] Playwright version required by `@redhat-cloud-services/playwright-test-auth` (check with `npm info @redhat-cloud-services/playwright-test-auth peerDependencies`)
+    - [ ] `e2e-playwright-image` parameter in pipeline YAML (e.g., "mcr.microsoft.com/playwright:v1.40.0-jammy")
   - [ ] `playwright.config.ts` or `playwright.config.js` exists
-  - [ ] **CRITICAL**: Playwright config uses sequential execution (`workers: 1` and `fullyParallel: false`)
+  - [ ] **CRITICAL**: Playwright config uses sequential execution in CI (`workers: process.env.CI ? 1 : undefined`)
+  - [ ] **CRITICAL**: playwright.config.ts uses shared auth setup (`globalSetup: require.resolve('@redhat-cloud-services/playwright-test-auth/global-setup')`)
+  - [ ] **CRITICAL**: playwright.config.ts uses storage state for auth sharing (`storageState: 'playwright/.auth/user.json'`)
+  - [ ] playwright.config.ts has `ignoreHTTPSErrors: true` for stage environment
   - [ ] **CRITICAL**: HCC_ENV_URL does NOT appear in playwright.config.* (use PLAYWRIGHT_BASE_URL instead)
   - [ ] **CRITICAL**: HCC_ENV_URL does NOT appear in test files (grep -r "HCC_ENV_URL" playwright/ should return nothing)
   - [ ] Test script in package.json (e.g., `"test:playwright": "playwright test"`)
   - [ ] Playwright tests exist in `playwright/` directory
-  - [ ] **CRITICAL**: `playwright-image` parameter version matches `@playwright/test` version in package.json
 - [ ] **CRITICAL**: Verified required parameters against latest shared pipeline definition
 - [ ] **CRITICAL**: Pipeline YAML validated before submission:
   - [ ] YAML syntax validated with yamllint
@@ -2345,8 +2488,11 @@ A successful setup means:
   - https://github.com/RedHatInsights/learning-resources
   - Pipeline: `.tekton/learning-resources-pull-request.yaml`
 
-- **frontend-starter-app**: In-progress example
+- **frontend-starter-app**: Reference for Playwright configuration
   - https://github.com/RedHatInsights/frontend-starter-app
+  - **RECOMMENDED**: Use `playwright.config.ts` as template for new test suites
+  - Demonstrates proper configuration of `@redhat-cloud-services/playwright-test-auth`
+  - Includes single worker setup, auth state sharing, and CI-specific settings
 
 - **insights-chrome**: Another working example
   - https://github.com/RedHatInsights/insights-chrome
