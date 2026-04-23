@@ -1,0 +1,50 @@
+{
+  "name": "@redhat-cloud-services/hcc-test-migration-mcp",
+  "version": "0.1.0",
+  "description": "HCC Test Migration MCP server for converting legacy Cypress tests to modern Playwright and Storybook",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "hcc-test-migration-mcp": "dist/index.js"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "hcc",
+    "test-migration",
+    "cypress",
+    "playwright",
+    "storybook",
+    "mcp",
+    "ast-parsing",
+    "red hat"
+  ],
+  "author": "Red Hat Cloud Services",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RedHatInsights/platform-frontend-ai-toolkit",
+    "directory": "packages/hcc-test-migration-mcp"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "typescript": "^5.9.2",
+    "zod": "^3.25.76",
+    "tslib": "^2.3.0"
+  }
+}

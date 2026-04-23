@@ -1,0 +1,27 @@
+{
+  "name": "@redhat-cloud-services/hcc-test-migration-mcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/hcc-test-migration-mcp/src",
+  "projectType": "library",
+  "tags": ["type:mcp"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/hcc-test-migration-mcp",
+        "tsConfig": "packages/hcc-test-migration-mcp/tsconfig.lib.json",
+        "packageJson": "packages/hcc-test-migration-mcp/package.json",
+        "main": "packages/hcc-test-migration-mcp/src/index.ts",
+        "assets": ["packages/hcc-test-migration-mcp/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/hcc-test-migration-mcp/jest.config.ts"
+      }
+    }
+  }
+}

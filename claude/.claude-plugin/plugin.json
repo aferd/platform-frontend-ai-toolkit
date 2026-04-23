@@ -1,6 +1,6 @@
 {
   "name": "hcc-frontend-ai-toolkit",
-  "version": "1.10.2",
+  "version": "1.11.0",
   "description": "A collection of custom Claude Code agents for frontend development and infrastructure teams",
   "author": {
     "name": "Martin Marosi",
@@ -10,7 +10,7 @@
   "homepage": "https://github.com/RedHatInsights/platform-frontend-ai-toolkit",
   "repository": "https://github.com/RedHatInsights/platform-frontend-ai-toolkit",
   "license": "Apache-2.0",
-  "keywords": ["frontend", "react", "development", "hcc"],
+  "keywords": ["frontend", "react", "development", "hcc", "test-migration"],
   "mcpServers": {
     "hcc-patternfly-data-view": {
       "command": "npx",
@@ -19,6 +19,10 @@
     "hcc-feo-mcp": {
       "command": "npx",
       "args": ["@redhat-cloud-services/hcc-feo-mcp"]
+    },
+    "hcc-test-migration-mcp": {
+      "command": "npx",
+      "args": ["@redhat-cloud-services/hcc-test-migration-mcp"]
     }
   }
 }
