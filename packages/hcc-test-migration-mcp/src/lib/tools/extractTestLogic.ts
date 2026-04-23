@@ -330,16 +330,22 @@ function extractAssertion(
 function extractSelector(node: ts.Node): string | undefined {
   let current: ts.Node = node;
 
-  // Walk up the chain looking for cy.get()
+  // Walk up the chain looking for Cypress selection methods
   while (current) {
     if (ts.isCallExpression(current)) {
       const expr = current.expression;
 
-      if (ts.isPropertyAccessExpression(expr) && expr.name.text === 'get') {
-        return extractFirstStringArg(current);
-      }
-
       if (ts.isPropertyAccessExpression(expr)) {
+        const methodName = expr.name.text;
+        // Support cy.get(), cy.contains(), cy.find(), cy.within()
+        if (['get', 'contains', 'find', 'within'].includes(methodName)) {
+          const selector = extractFirstStringArg(current);
+          if (selector) {
+            return selector;
+          }
+        }
+
+        // Continue walking up the chain
         current = expr.expression;
         continue;
       }
@@ -378,7 +384,7 @@ function categorizeTest(
   setup: SetupAction[],
   triggers: TriggerAction[],
   assertions: AssertionAction[]
-): 'storybook' | 'unit' | 'e2e' | 'obsolete' {
+): 'storybook' | 'unit' | 'e2e' {
   // If has visit or multiple triggers, likely E2E
   if (setup.some(s => s.type === 'visit') || triggers.length > 3) {
     return 'e2e';

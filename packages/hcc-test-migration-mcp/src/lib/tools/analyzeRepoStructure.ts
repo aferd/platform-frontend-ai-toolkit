@@ -53,15 +53,15 @@ export function analyzeRepoStructureTool(): McpTool {
 ## Summary
 
 - **Total Components**: ${totalComponents}
-- **Components with Tests**: ${totalComponents - componentsWithNoTests} (${((totalComponents - componentsWithNoTests) / totalComponents * 100).toFixed(1)}%)
-- **Components without Tests**: ${componentsWithNoTests} (${(componentsWithNoTests / totalComponents * 100).toFixed(1)}%)
+- **Components with Tests**: ${totalComponents - componentsWithNoTests} (${totalComponents > 0 ? ((totalComponents - componentsWithNoTests) / totalComponents * 100).toFixed(1) : '0.0'}%)
+- **Components without Tests**: ${componentsWithNoTests} (${totalComponents > 0 ? (componentsWithNoTests / totalComponents * 100).toFixed(1) : '0.0'}%)
 
 ## Test Coverage by Type
 
-- **Jest Unit Tests**: ${componentsWithJest} (${(componentsWithJest / totalComponents * 100).toFixed(1)}%)
-- **Storybook Stories**: ${componentsWithStorybook} (${(componentsWithStorybook / totalComponents * 100).toFixed(1)}%)
-- **Playwright E2E**: ${componentsWithPlaywright} (${(componentsWithPlaywright / totalComponents * 100).toFixed(1)}%)
-- **Cypress (Legacy)**: ${componentsWithCypress} (${(componentsWithCypress / totalComponents * 100).toFixed(1)}%)
+- **Jest Unit Tests**: ${componentsWithJest} (${totalComponents > 0 ? (componentsWithJest / totalComponents * 100).toFixed(1) : '0.0'}%)
+- **Storybook Stories**: ${componentsWithStorybook} (${totalComponents > 0 ? (componentsWithStorybook / totalComponents * 100).toFixed(1) : '0.0'}%)
+- **Playwright E2E**: ${componentsWithPlaywright} (${totalComponents > 0 ? (componentsWithPlaywright / totalComponents * 100).toFixed(1) : '0.0'}%)
+- **Cypress (Legacy)**: ${componentsWithCypress} (${totalComponents > 0 ? (componentsWithCypress / totalComponents * 100).toFixed(1) : '0.0'}%)
 
 ## Coverage Gaps
 

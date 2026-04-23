@@ -10,7 +10,7 @@ This file provides cross-cutting conventions and AI-specific repository guidance
 
 The toolkit follows a layered documentation architecture to provide AI agents with comprehensive context:
 
-```
+```text
 AGENTS.md (this file)
 ├── Entry point for AI agent context
 ├── Indexes domain-specific guidelines

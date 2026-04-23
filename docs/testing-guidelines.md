@@ -15,7 +15,7 @@ This document outlines the testing standards and best practices for HCC Frontend
 - Test individual functions, utilities, and React hooks
 - Located adjacent to source files: `component.tsx` → `component.test.tsx`
 - Focus on pure logic, no DOM rendering required
-- Use `@testing-library/react-hooks` for hook testing
+- Use `renderHook` from `@testing-library/react` for hook testing (React 18+)
 
 **Component Tests** (Storybook with Play Functions)
 - Test isolated UI components with user interactions
@@ -178,7 +178,7 @@ test('component meets accessibility standards', async ({ page }) => {
 
 ## File Organization
 
-```
+```text
 src/
 ├── components/
 │   ├── Button/

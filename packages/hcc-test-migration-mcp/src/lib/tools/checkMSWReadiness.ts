@@ -253,10 +253,33 @@ function extractCypressIntercepts(code: string, sourceFile: ts.SourceFile): ApiC
 
       if (ts.isPropertyAccessExpression(expression)) {
         if (expression.name.text === 'intercept') {
-          const method = extractFirstStringArg(node) || 'GET';
-          const url = node.arguments.length > 1 && ts.isStringLiteral(node.arguments[1])
-            ? node.arguments[1].text
-            : 'dynamic';
+          let method = 'GET';
+          let url = 'dynamic';
+
+          // cy.intercept can be: cy.intercept(url), cy.intercept(method, url), or cy.intercept(routeMatcher)
+          if (node.arguments.length === 1) {
+            const arg = node.arguments[0];
+            if (ts.isStringLiteral(arg)) {
+              url = arg.text;
+            } else if (ts.isObjectLiteralExpression(arg)) {
+              // routeMatcher object - try to extract url property
+              const urlProp = arg.properties.find(
+                p => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === 'url'
+              );
+              if (urlProp && ts.isPropertyAssignment(urlProp) && ts.isStringLiteral(urlProp.initializer)) {
+                url = urlProp.initializer.text;
+              }
+            }
+          } else if (node.arguments.length >= 2) {
+            const firstArg = extractFirstStringArg(node);
+            if (firstArg && ts.isStringLiteral(node.arguments[1])) {
+              method = firstArg;
+              url = node.arguments[1].text;
+            } else if (ts.isStringLiteral(node.arguments[0])) {
+              url = node.arguments[0].text;
+            }
+          }
+
           const lineNumber = sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
 
           intercepts.push({
@@ -340,13 +363,18 @@ function generateMockResponse(call: ApiCallInfo): any {
  * Generate handler function name
  */
 function generateHandlerName(handler: MSWHandler): string {
-  const urlPart = handler.url
+  let urlPart = handler.url
     .replace(/^\/api\//, '')
     .replace(/[^a-zA-Z0-9]/g, '_')
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '');
 
-  return `handle${handler.method.charAt(0) + handler.method.slice(1).toLowerCase()}${urlPart}`;
+  if (!urlPart) {
+    urlPart = 'Root';
+  }
+
+  const methodPart = handler.method.charAt(0).toUpperCase() + handler.method.slice(1).toLowerCase();
+  return `handle${methodPart}${urlPart}`;
 }
 
 /**

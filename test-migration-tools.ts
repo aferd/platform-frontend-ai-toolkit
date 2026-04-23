@@ -15,7 +15,7 @@ async function main() {
   console.log('='.repeat(80));
 
   // Set the repository root to notifications-frontend
-  const notificationsRepo = '/Users/aferdina/notifications-frontend';
+  const notificationsRepo = process.env.NOTIFICATIONS_REPO || './notifications-frontend';
   setRepoRoot(notificationsRepo);
   console.log(`📁 Repository: ${notificationsRepo}\n`);
 
@@ -33,9 +33,13 @@ async function main() {
 
     console.log('✅ Audit completed successfully');
     console.log('\nResult:');
-    const content = auditResult.content[0];
-    if (content.type === 'text') {
-      console.log(content.text);
+    if (auditResult.content && auditResult.content.length > 0) {
+      const content = auditResult.content[0];
+      if (content.type === 'text') {
+        console.log(content.text);
+      }
+    } else {
+      console.log('⚠️  No content returned');
     }
   } catch (error) {
     console.error('❌ Audit failed:', error);
@@ -54,13 +58,17 @@ async function main() {
 
     console.log('✅ Test logic extraction completed');
     console.log('\nResult (first 2000 chars):');
-    const content = extractResult.content[0];
-    if (content.type === 'text') {
-      const text = content.text;
-      console.log(text.substring(0, 2000));
-      if (text.length > 2000) {
-        console.log(`\n... (${text.length - 2000} more characters)`);
+    if (extractResult.content && extractResult.content.length > 0) {
+      const content = extractResult.content[0];
+      if (content.type === 'text') {
+        const text = content.text;
+        console.log(text.substring(0, 2000));
+        if (text.length > 2000) {
+          console.log(`\n... (${text.length - 2000} more characters)`);
+        }
       }
+    } else {
+      console.log('⚠️  No content returned');
     }
   } catch (error) {
     console.error('❌ Extraction failed:', error);
@@ -79,9 +87,13 @@ async function main() {
 
     console.log('✅ MSW readiness check completed');
     console.log('\nResult:');
-    const content = mswResult.content[0];
-    if (content.type === 'text') {
-      console.log(content.text);
+    if (mswResult.content && mswResult.content.length > 0) {
+      const content = mswResult.content[0];
+      if (content.type === 'text') {
+        console.log(content.text);
+      }
+    } else {
+      console.log('⚠️  No content returned');
     }
   } catch (error) {
     console.error('❌ MSW check failed:', error);
@@ -101,13 +113,17 @@ async function main() {
 
     console.log('✅ Repository analysis completed');
     console.log('\nResult (first 3000 chars):');
-    const content = analyzeResult.content[0];
-    if (content.type === 'text') {
-      const text = content.text;
-      console.log(text.substring(0, 3000));
-      if (text.length > 3000) {
-        console.log(`\n... (${text.length - 3000} more characters)`);
+    if (analyzeResult.content && analyzeResult.content.length > 0) {
+      const content = analyzeResult.content[0];
+      if (content.type === 'text') {
+        const text = content.text;
+        console.log(text.substring(0, 3000));
+        if (text.length > 3000) {
+          console.log(`\n... (${text.length - 3000} more characters)`);
+        }
       }
+    } else {
+      console.log('⚠️  No content returned');
     }
   } catch (error) {
     console.error('❌ Repository analysis failed:', error);

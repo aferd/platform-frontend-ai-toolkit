@@ -32,12 +32,14 @@ Validate the MCP Test Migration system against a **real production Cypress test*
 - **Reason**: Test is still relevant to current UI state
 
 **Selectors Matched**:
-- ✅ `#drawer-toggle`
-- ✅ `[aria-label="Notification actions dropdown"]`
-- ✅ `.pf-m-read` (PatternFly read state)
-- ✅ `[role="menuitem"]`
-- ✅ `.pf-v6-c-notification-drawer__list-item`
+```text
+- ✅ #drawer-toggle
+- ✅ [aria-label="Notification actions dropdown"]
+- ✅ .pf-m-read (PatternFly read state)
+- ✅ [role="menuitem"]
+- ✅ .pf-v6-c-notification-drawer__list-item
 - ... and 13 more
+```
 
 **Key Insight**: The tool correctly identified that the Cypress test is testing current functionality, not obsolete code.
 
@@ -280,7 +282,7 @@ To use the system in production:
 ## 📊 Test Evidence
 
 **Generated Artifacts**:
-1. ✅ `/Users/aferdina/notifications-frontend/MIGRATION_ANALYSIS.md` (405 lines)
+1. ✅ `notifications-frontend/MIGRATION_ANALYSIS.md` (405 lines)
    - Complete analysis of NotificationsDrawer.cy.tsx
    - MSW handler code generation
    - Step-by-step migration plan
