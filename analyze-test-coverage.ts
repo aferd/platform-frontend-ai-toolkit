@@ -2,12 +2,15 @@
 import { analyzeRepoStructureTool } from './packages/hcc-test-migration-mcp/src/lib/tools/analyzeRepoStructure';
 import { setRepoRoot } from './packages/hcc-test-migration-mcp/src/lib/utils/pathSecurity';
 import { writeFileSync, existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { join, basename } from 'path';
 
 async function generateAnalysisReport(repoPath: string) {
   console.log('🔍 Analyzing repository structure...\n');
 
   setRepoRoot(repoPath);
+
+  // Get repository name from path
+  const repoName = basename(repoPath);
 
   // Run repository structure analysis
   const [, , analyzeFunc] = analyzeRepoStructureTool();
@@ -43,7 +46,7 @@ async function generateAnalysisReport(repoPath: string) {
     throw new Error('Unexpected content type');
   }
 
-  let report = `# Test Coverage Analysis - Notifications Frontend
+  let report = `# Test Coverage Analysis - ${repoName}
 Generated: ${new Date().toISOString()}
 
 ---
@@ -98,10 +101,13 @@ Generated: ${new Date().toISOString()}
   };
 }
 
-const repoPath = process.env.NOTIFICATIONS_REPO || '/Users/aferdina/notifications-frontend';
+// Get repository path from command line argument or environment variable
+const repoPath = process.argv[2] || process.env.TARGET_REPO || process.cwd();
 
 if (!existsSync(repoPath)) {
   console.error(`❌ Repository not found: ${repoPath}`);
+  console.error(`\nUsage: tsx generate-analysis-report.ts [repository-path]`);
+  console.error(`   or: TARGET_REPO=/path/to/repo tsx generate-analysis-report.ts`);
   process.exit(1);
 }
 

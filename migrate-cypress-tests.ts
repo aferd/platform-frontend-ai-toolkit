@@ -3,7 +3,8 @@ import { auditTestCoverageAndRelevanceTool } from './packages/hcc-test-migration
 import { extractTestLogicTool } from './packages/hcc-test-migration-mcp/src/lib/tools/extractTestLogic';
 import { checkMSWReadinessTool } from './packages/hcc-test-migration-mcp/src/lib/tools/checkMSWReadiness';
 import { setRepoRoot } from './packages/hcc-test-migration-mcp/src/lib/utils/pathSecurity';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 interface TestMigrationPlan {
   testPath: string;
@@ -91,11 +92,53 @@ async function analyzeTest(testPath: string, componentPath: string | null): Prom
   };
 }
 
+// Discover Cypress test files in a repository
+function findCypressTests(repoPath: string): Array<{ testPath: string; componentPath: string | null }> {
+  const tests: Array<{ testPath: string; componentPath: string | null }> = [];
+
+  const searchDir = (dir: string, relativePath = '') => {
+    try {
+      const items = readdirSync(join(repoPath, dir), { withFileTypes: true });
+      for (const item of items) {
+        const itemPath = relativePath ? `${relativePath}/${item.name}` : item.name;
+        const fullPath = join(dir, item.name);
+
+        if (item.isDirectory() && item.name !== 'node_modules') {
+          searchDir(fullPath, itemPath);
+        } else if (item.isFile() && item.name.match(/\.cy\.(ts|tsx|js|jsx)$/)) {
+          tests.push({
+            testPath: itemPath,
+            componentPath: null // Could be enhanced to auto-detect component path
+          });
+        }
+      }
+    } catch (err) {
+      // Directory doesn't exist or can't be read
+    }
+  };
+
+  // Search common Cypress test directories
+  if (existsSync(join(repoPath, 'cypress'))) {
+    searchDir('cypress', 'cypress');
+  }
+  if (existsSync(join(repoPath, 'test'))) {
+    searchDir('test', 'test');
+  }
+  if (existsSync(join(repoPath, 'tests'))) {
+    searchDir('tests', 'tests');
+  }
+
+  return tests;
+}
+
 async function main() {
-  const repoPath = process.env.NOTIFICATIONS_REPO || '/Users/aferdina/notifications-frontend';
+  // Get repository path from command line argument or environment variable
+  const repoPath = process.argv[2] || process.env.TARGET_REPO || process.cwd();
 
   if (!existsSync(repoPath)) {
     console.error(`❌ Repository not found: ${repoPath}`);
+    console.error(`\nUsage: tsx migrate-cypress-tests.ts [repository-path]`);
+    console.error(`   or: TARGET_REPO=/path/to/repo tsx migrate-cypress-tests.ts`);
     process.exit(1);
   }
 
@@ -105,20 +148,21 @@ async function main() {
   console.log('='.repeat(80));
   console.log(`📁 Repository: ${repoPath}\n`);
 
-  const tests = [
-    {
-      testPath: 'cypress/components/NotificationsDrawer.cy.tsx',
-      componentPath: 'src/components/NotificationsDrawer/DrawerPanel.tsx'
-    },
-    {
-      testPath: 'cypress/components/UserAccessGroupsDataView.cy.tsx',
-      componentPath: null // Will need to determine
-    },
-    {
-      testPath: 'cypress/e2e/spec.cy.ts',
-      componentPath: null // E2E test
-    }
-  ];
+  // Auto-discover Cypress tests
+  const tests = findCypressTests(repoPath);
+
+  if (tests.length === 0) {
+    console.log('⚠️  No Cypress tests found in this repository.');
+    console.log('   Searched directories: cypress/, test/, tests/');
+    console.log('   Looking for files matching: *.cy.{ts,tsx,js,jsx}');
+    process.exit(0);
+  }
+
+  console.log(`📝 Found ${tests.length} Cypress test file(s):\n`);
+  tests.forEach((test, i) => {
+    console.log(`   ${i + 1}. ${test.testPath}`);
+  });
+  console.log();
 
   const plans: TestMigrationPlan[] = [];
 
