@@ -61,7 +61,7 @@ async function analyzeTest(testPath: string, componentPath: string | null): Prom
   const extractText = extractResult.content[0]?.text || '';
 
   const testCount = parseInt(extractText.match(/Found \*\*(\d+)\*\*/)?.[1] || '0');
-  const categoryMatch = extractText.match(/Category: ([A-Z]+)/);
+  const categoryMatch = extractText.match(/\*\*Category\*\*: ([A-Z]+)/);
   const category = (categoryMatch?.[1]?.toLowerCase() || 'e2e') as 'storybook' | 'unit' | 'e2e';
 
   console.log(`   ✅ Extracted: ${testCount} test case(s)`);
