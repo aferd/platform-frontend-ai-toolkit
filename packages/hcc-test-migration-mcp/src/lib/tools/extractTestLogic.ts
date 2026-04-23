@@ -26,7 +26,7 @@ export function extractTestLogicTool(): McpTool {
 
       // Extract test logic
       const testMaps: TestLogicMap[] = [];
-      extractTests(sourceFile, testMaps, input.testFilePath);
+      extractTests(sourceFile, testMaps, input.testFilePath, testCode);
 
       // Generate detailed report
       const report = generateReport(testMaps);
@@ -67,7 +67,7 @@ export function extractTestLogicTool(): McpTool {
 /**
  * Extract tests from source file
  */
-function extractTests(sourceFile: ts.SourceFile, testMaps: TestLogicMap[], filePath: string): void {
+function extractTests(sourceFile: ts.SourceFile, testMaps: TestLogicMap[], filePath: string, testCode: string): void {
   function visit(node: ts.Node) {
     // Look for it() or test() calls
     if (ts.isCallExpression(node)) {
@@ -75,7 +75,7 @@ function extractTests(sourceFile: ts.SourceFile, testMaps: TestLogicMap[], fileP
 
       if (ts.isIdentifier(expression) && (expression.text === 'it' || expression.text === 'test')) {
         const testName = extractTestName(node);
-        const testMap = extractTestBody(node, testName, filePath);
+        const testMap = extractTestBody(node, testName, filePath, testCode);
 
         if (testMap) {
           testMaps.push(testMap);
@@ -107,7 +107,7 @@ function extractTestName(node: ts.CallExpression): string {
 /**
  * Extract test body and categorize actions
  */
-function extractTestBody(node: ts.CallExpression, testName: string, filePath: string): TestLogicMap | null {
+function extractTestBody(node: ts.CallExpression, testName: string, filePath: string, testCode: string): TestLogicMap | null {
   const setup: SetupAction[] = [];
   const triggers: TriggerAction[] = [];
   const assertions: AssertionAction[] = [];
@@ -130,7 +130,7 @@ function extractTestBody(node: ts.CallExpression, testName: string, filePath: st
   }
 
   // Determine test category
-  const category = categorizeTest(setup, triggers, assertions);
+  const category = categorizeTest(setup, triggers, assertions, testCode);
 
   return {
     testName,
@@ -383,16 +383,17 @@ function extractStringFromArg(arg: ts.Expression): string | undefined {
 function categorizeTest(
   setup: SetupAction[],
   triggers: TriggerAction[],
-  assertions: AssertionAction[]
+  assertions: AssertionAction[],
+  testCode: string
 ): 'storybook' | 'unit' | 'e2e' {
-  // If has visit or multiple triggers, likely E2E
-  if (setup.some(s => s.type === 'visit') || triggers.length > 3) {
-    return 'e2e';
+  // CRITICAL: Check for cy.mount() - definitive indicator of component test
+  if (testCode.includes('cy.mount(')) {
+    return 'storybook';
   }
 
-  // If has intercepts and triggers, likely component test (Storybook)
-  if (setup.some(s => s.type === 'intercept') && triggers.length > 0) {
-    return 'storybook';
+  // If has visit, definitely E2E
+  if (setup.some(s => s.type === 'visit')) {
+    return 'e2e';
   }
 
   // If only assertions, likely unit test
@@ -400,11 +401,22 @@ function categorizeTest(
     return 'unit';
   }
 
-  // Simple interactions, likely Storybook
-  if (triggers.length <= 3) {
+  // If has intercepts and triggers, likely component test (Storybook)
+  if (setup.some(s => s.type === 'intercept') && triggers.length > 0) {
     return 'storybook';
   }
 
+  // Multiple triggers without mount or visit, likely E2E
+  if (triggers.length > 3) {
+    return 'e2e';
+  }
+
+  // Simple interactions, likely Storybook
+  if (triggers.length > 0) {
+    return 'storybook';
+  }
+
+  // Default to E2E if unclear
   return 'e2e';
 }
 
